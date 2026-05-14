@@ -1,0 +1,15 @@
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+escrow = "Exn6aYyaYd87AhNrEKhaGHXGJgXumXeNCkJnkKzM23wV"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test"
+
+[hooks]
