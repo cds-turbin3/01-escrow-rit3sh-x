@@ -83,12 +83,6 @@ impl<'info> Make<'info> {
     }
 
     pub fn deposit(&mut self, deposit: u64) -> Result<()> {
-        let now = Clock::get()?.unix_timestamp;
-
-        if let Some(expiry) = self.escrow.expiry_utc {
-            require!(expiry > now, EscrowError::EscrowExpired);
-        }
-
         let transfer_accounts = TransferChecked {
             from: self.maker_ata_a.to_account_info(),
             mint: self.mint_a.to_account_info(),

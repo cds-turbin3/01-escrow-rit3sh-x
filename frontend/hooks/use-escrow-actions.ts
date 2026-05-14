@@ -4,6 +4,7 @@ import type { AnchorWallet } from "@solana/wallet-adapter-react"
 import type { Escrow } from "@contracts/escrow"
 import { PublicKey } from "@solana/web3.js"
 import {
+    addTrackedEscrow,
     deriveEscrowPda,
     deriveVaultPda,
     randomSeed,
@@ -76,6 +77,8 @@ export function useEscrowActions({ program, wallet, onDone }: Args) {
                         systemProgram: SPL.SYSTEM_PROGRAM_ID,
                     })
                     .rpc()
+
+                addTrackedEscrow(wallet.publicKey, escrow.toBase58())
             }),
         [wrap, program, wallet]
     )

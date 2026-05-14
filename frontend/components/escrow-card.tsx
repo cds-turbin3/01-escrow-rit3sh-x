@@ -37,9 +37,14 @@ export function EscrowCard({
     return (
         <section className="flex flex-col gap-3 rounded-md border border-border p-4">
             <header className="flex items-baseline justify-between gap-4">
-                <span className="text-xs text-muted-foreground">
+                <button
+                    type="button"
+                    onClick={() => navigator.clipboard.writeText(publicKey.toBase58())}
+                    title="copy address"
+                    className="text-left text-xs text-muted-foreground hover:text-foreground"
+                >
                     escrow <code>{shortAddress(publicKey)}</code>
-                </span>
+                </button>
                 <span
                     className={`text-xs ${expired ? "text-destructive" : "text-muted-foreground"}`}
                 >
@@ -52,7 +57,7 @@ export function EscrowCard({
                 <code>{shortAddress(account.maker)}</code>
                 <span className="text-muted-foreground">offers</span>
                 <code>
-                    {formatTokenAmount(account.amount, mintADecs)} of{" "}
+                    {formatTokenAmount(entry.vaultAmount, mintADecs)} of{" "}
                     {shortAddress(account.mintA)}
                 </code>
                 <span className="text-muted-foreground">wants</span>

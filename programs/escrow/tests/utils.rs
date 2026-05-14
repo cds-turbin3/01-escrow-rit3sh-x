@@ -199,7 +199,7 @@ impl EscrowAccounts {
         }
     }
 
-    #[allow(dead_code)]
+
     pub fn refund_ix_with_maker(&self, maker: Pubkey, maker_ata_a: Pubkey) -> Instruction {
         Instruction {
             program_id: escrow::id(),
@@ -229,12 +229,10 @@ pub fn escrow_state(svm: &LiteSVM, escrow: &Pubkey) -> escrow::state::Escrow {
     escrow::state::Escrow::try_deserialize(&mut account.data.as_ref()).unwrap()
 }
 
-#[allow(dead_code)]
 pub fn current_unix_timestamp(svm: &LiteSVM) -> i64 {
     svm.get_sysvar::<Clock>().unix_timestamp
 }
 
-#[allow(dead_code)]
 pub fn set_unix_timestamp(svm: &mut LiteSVM, new_ts: i64) {
     let mut clock = svm.get_sysvar::<Clock>();
     clock.unix_timestamp = new_ts;

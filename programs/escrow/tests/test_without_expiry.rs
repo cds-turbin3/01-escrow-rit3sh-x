@@ -104,6 +104,40 @@ fn refund_returns_vault_and_closes_state() {
 }
 
 #[test]
+fn take_drains_vault_when_deposit_differs_from_amount() {
+    // The maker deposits more A than the ask price in B. Take must drain the
+    // entire vault to the taker (not just `amount`) so vault.close succeeds.
+    let (mut svm, maker_authority, taker_authority) = setup();
+    let accounts = EscrowAccounts::new(&mut svm, &maker_authority, &taker_authority, 200);
+
+    let deposit = 10_000_000; // 10 A locked
+    let amount = 4_000_000; // 4 B asked
+
+    send_instruction(
+        &mut svm,
+        &maker_authority,
+        accounts.make_ix(amount, deposit, None),
+    );
+    assert_eq!(token_balance(&svm, &accounts.vault), deposit);
+
+    let taker_b_before = token_balance(&svm, &accounts.taker_ata_b);
+
+    send_instruction(&mut svm, &taker_authority, accounts.take_ix());
+
+    // Vault + escrow closed (no leftover blocking the close).
+    assert!(svm.get_account(&accounts.escrow).is_none());
+    assert!(svm.get_account(&accounts.vault).is_none());
+
+    // Taker paid `amount` of B and received the *full deposit* of A.
+    assert_eq!(
+        taker_b_before - token_balance(&svm, &accounts.taker_ata_b),
+        amount
+    );
+    assert_eq!(token_balance(&svm, &accounts.taker_ata_a), deposit);
+    assert_eq!(token_balance(&svm, &accounts.maker_ata_b), amount);
+}
+
+#[test]
 fn two_concurrent_escrows_use_distinct_seeds() {
     let (mut svm, maker_authority, taker_authority) = setup();
     let a = EscrowAccounts::new(&mut svm, &maker_authority, &taker_authority, 100);

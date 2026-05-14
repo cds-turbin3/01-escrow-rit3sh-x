@@ -118,7 +118,7 @@ impl<'info> Take<'info> {
         let cpi_ctx =
             CpiContext::new_with_signer(self.token_program.key(), cpi_accounts, signer_seeds);
 
-        transfer_checked(cpi_ctx, self.escrow.amount, self.mint_a.decimals)?;
+        transfer_checked(cpi_ctx, self.vault.amount, self.mint_a.decimals)?;
 
         let cpi_accounts = CloseAccount {
             account: self.vault.to_account_info(),

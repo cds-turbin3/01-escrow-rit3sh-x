@@ -2,10 +2,11 @@
 
 A Solana Anchor program that lets one party (`maker`) lock SPL tokens of mint `A` against an asking price in mint `B`. A second party (`taker`) atomically exchanges the two, and the `maker` can refund the offer at any time. Offers may optionally carry a UTC expiry the chain enforces it on both `make` and `take`.
 
-A React frontend exposes two pages:
+The React frontend is a single page with three sections:
 
-- **Browse**: public list of every active escrow.
-- **Manage**: make new offers and refund the ones you own.
+- **Make**: create a new escrow. The PDA is auto-saved to localStorage so you can find it after refresh.
+- **Take by address**: paste any escrow PDA, see its terms, take it.
+- **Your escrows**: escrows the connected wallet has made; click the address to copy it for sharing with a taker. Refund any open offer.
 
 ## Architecture
 
@@ -114,7 +115,6 @@ sequenceDiagram
 All tests are Rust LiteSVM (`programs/escrow/tests/`). No JS/TS suite — clock-warp + deterministic mints are easier in-Rust.
 
 ```sh
-# Run the suite (Anchor invokes `cargo test`).
 anchor test
 ```
 
@@ -152,7 +152,7 @@ anchor test
     yarn dev
     ```
 
-5. Open the printed URL, connect a wallet set to **Localnet**, and paste the two mint addresses into the Manage form.
+5. Open the printed URL, connect a wallet set to **Localnet**, paste the two mint addresses into the Make form, click "Create escrow". Copy the resulting escrow PDA (click it on the card) and paste it into the **Take by address** form from a second wallet to fill the offer.
 
 ### Build / lint / format
 

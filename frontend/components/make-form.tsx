@@ -27,9 +27,6 @@ export function MakeForm({ connection, onSubmit, disabled }: Props) {
             const bPk = new PublicKey(mintB.trim())
             const aInfo = await getMint(connection, aPk)
             const bInfo = await getMint(connection, bPk)
-            // For now `amount` and `deposit` are sized off the *ask* token,
-            // matching how the on-chain Escrow stores `amount` as the price the
-            // taker pays. Offer-side decimals scale the `deposit` argument.
             const deposit = parseTokenAmount(offerAmount, aInfo.decimals)
             const amount = parseTokenAmount(askAmount, bInfo.decimals)
             const expiryUnix = expiry
@@ -74,7 +71,7 @@ export function MakeForm({ connection, onSubmit, disabled }: Props) {
                 label="Amount taker must pay"
                 value={askAmount}
                 onChange={setAskAmount}
-                placeholder="e.g. 25"
+                placeholder="e.g. 4"
             />
             <label className="flex flex-col gap-1 text-sm">
                 <span className="text-xs text-muted-foreground">

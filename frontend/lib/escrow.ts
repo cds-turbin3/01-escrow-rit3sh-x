@@ -3,6 +3,7 @@ import type { AnchorWallet } from "@solana/wallet-adapter-react"
 import type { Escrow } from "@contracts/escrow"
 import idl from "@idl/escrow.json"
 import {
+    AccountLayout,
     ASSOCIATED_TOKEN_PROGRAM_ID,
     getAssociatedTokenAddressSync,
     getMint,
@@ -37,13 +38,9 @@ export type EscrowEntry = {
     publicKey: PublicKey
     account: EscrowAccount
     vault: PublicKey
+    vaultAmount: bigint
 }
 
-/**
- * Build a Program tied to the connected wallet. Used for writes; reads can
- * also flow through it but `buildReadOnlyProgram` lets the Browse page work
- * with no wallet attached.
- */
 export function buildProgram(
     connection: Connection,
     wallet: AnchorWallet
@@ -54,10 +51,6 @@ export function buildProgram(
     return new Program(idl as Escrow, provider)
 }
 
-/**
- * Read-only Program: signing methods throw, but `program.account.escrow.all()`
- * and `.fetch()` never call them.
- */
 export function buildReadOnlyProgram(connection: Connection): Program<Escrow> {
     const stub: Wallet = {
         publicKey: Keypair.generate().publicKey,
@@ -98,25 +91,75 @@ export function randomSeed(): BN {
     return new BN(buf)
 }
 
-/** Fetch every escrow on-chain plus its derived vault address. */
-export async function fetchAllEscrows(
-    program: Program<Escrow>
+export async function fetchEscrowsByPda(
+    program: Program<Escrow>,
+    pdas: PublicKey[]
 ): Promise<EscrowEntry[]> {
-    const raws = await program.account.escrow.all()
-    return raws.map((r) => {
-        const account = r.account as unknown as EscrowAccount
-        return {
-            publicKey: r.publicKey,
+    if (pdas.length === 0) return []
+    const raws = await program.account.escrow.fetchMultiple(pdas)
+    const entries: EscrowEntry[] = []
+    pdas.forEach((pk, i) => {
+        const account = raws[i] as unknown as EscrowAccount | null
+        if (!account) return
+        entries.push({
+            publicKey: pk,
             account,
-            vault: deriveVaultPda(r.publicKey, account.mintA),
-        }
+            vault: deriveVaultPda(pk, account.mintA),
+            vaultAmount: 0n,
+        })
     })
+
+    if (entries.length === 0) return entries
+
+    const infos = await program.provider.connection.getMultipleAccountsInfo(
+        entries.map((e) => e.vault)
+    )
+    for (let i = 0; i < entries.length; i++) {
+        const info = infos[i]
+        if (!info) continue
+        try {
+            entries[i].vaultAmount = AccountLayout.decode(info.data).amount
+        } catch {
+            entries[i].vaultAmount = 0n
+        }
+    }
+    return entries
 }
 
-/**
- * Resolve `decimals` for a set of mints in one batch. Errors on individual
- * mints fall back to a default of 0 so the UI still renders.
- */
+export async function fetchEscrowByPda(
+    program: Program<Escrow>,
+    pda: PublicKey
+): Promise<EscrowEntry | null> {
+    const [entry] = await fetchEscrowsByPda(program, [pda])
+    return entry ?? null
+}
+
+const STORAGE_PREFIX = "escrow:tracked:"
+
+export function loadTrackedEscrows(wallet: PublicKey): string[] {
+    if (typeof localStorage === "undefined") return []
+    try {
+        const raw = localStorage.getItem(STORAGE_PREFIX + wallet.toBase58())
+        return raw ? (JSON.parse(raw) as string[]) : []
+    } catch {
+        return []
+    }
+}
+
+export function addTrackedEscrow(wallet: PublicKey, pda: string): void {
+    if (typeof localStorage === "undefined") return
+    const list = loadTrackedEscrows(wallet)
+    if (list.includes(pda)) return
+    list.push(pda)
+    localStorage.setItem(STORAGE_PREFIX + wallet.toBase58(), JSON.stringify(list))
+}
+
+export function removeTrackedEscrow(wallet: PublicKey, pda: string): void {
+    if (typeof localStorage === "undefined") return
+    const list = loadTrackedEscrows(wallet).filter((p) => p !== pda)
+    localStorage.setItem(STORAGE_PREFIX + wallet.toBase58(), JSON.stringify(list))
+}
+
 export async function fetchMintDecimals(
     connection: Connection,
     mints: PublicKey[]
@@ -185,7 +228,6 @@ export function isExpired(
     return expiry.toNumber() < nowSec
 }
 
-/** Re-exports so callers don't import @solana/spl-token everywhere. */
 export const SPL = {
     TOKEN_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID,
