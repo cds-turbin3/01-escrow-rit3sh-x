@@ -8,7 +8,7 @@ use anchor_spl::token_interface::{
 };
 
 #[derive(Accounts)]
-#[instruction(seeds: u64)]
+#[instruction(seed: u64)]
 pub struct Make<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
@@ -34,7 +34,7 @@ pub struct Make<'info> {
     #[account(
         init,
         payer = maker,
-        seeds = [ESCROW_SEED, maker.key().as_ref(), seeds.to_le_bytes().as_ref()],
+        seeds = [ESCROW_SEED, maker.key().as_ref(), seed.to_le_bytes().as_ref()],
         bump,
         space = Escrow::DISCRIMINATOR.len() + Escrow::INIT_SPACE,
     )]
@@ -64,6 +64,13 @@ impl<'info> Make<'info> {
         bumps: &MakeBumps,
         expiry_utc: Option<i64>,
     ) -> Result<()> {
+        require!(amount > 0, EscrowError::AmountIsZero);
+        require_keys_neq!(
+            self.mint_a.key(),
+            self.mint_b.key(),
+            EscrowError::MintsMustDiffer
+        );
+
         let now = Clock::get()?.unix_timestamp;
 
         if let Some(expiry) = expiry_utc {
@@ -83,6 +90,8 @@ impl<'info> Make<'info> {
     }
 
     pub fn deposit(&mut self, deposit: u64) -> Result<()> {
+        require!(deposit > 0, EscrowError::DepositIsZero);
+
         let transfer_accounts = TransferChecked {
             from: self.maker_ata_a.to_account_info(),
             mint: self.mint_a.to_account_info(),

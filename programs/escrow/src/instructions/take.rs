@@ -1,4 +1,3 @@
-use crate::error::EscrowError;
 use crate::state::Escrow;
 use crate::ESCROW_SEED;
 use anchor_lang::prelude::*;
@@ -79,13 +78,7 @@ pub struct Take<'info> {
 }
 
 impl<'info> Take<'info> {
-    pub fn deposit(&mut self) -> Result<()> {
-        let now = Clock::get()?.unix_timestamp;
-
-        if let Some(expiry) = self.escrow.expiry_utc {
-            require!(expiry >= now, EscrowError::EscrowExpired);
-        }
-
+    pub fn pay_maker(&mut self) -> Result<()> {
         let cpi_accounts = TransferChecked {
             from: self.taker_ata_b.to_account_info(),
             to: self.maker_ata_b.to_account_info(),
@@ -98,7 +91,7 @@ impl<'info> Take<'info> {
         transfer_checked(cpi_ctx, self.escrow.amount, self.mint_b.decimals)
     }
 
-    pub fn withdraw_and_close_vault(&mut self) -> Result<()> {
+    pub fn release_to_taker(&mut self) -> Result<()> {
         let cpi_accounts = TransferChecked {
             from: self.vault.to_account_info(),
             to: self.taker_ata_a.to_account_info(),

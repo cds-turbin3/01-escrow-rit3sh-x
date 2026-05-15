@@ -25,10 +25,19 @@ export function MakeForm({ connection, onSubmit, disabled }: Props) {
         try {
             const aPk = new PublicKey(mintA.trim())
             const bPk = new PublicKey(mintB.trim())
+            if (aPk.equals(bPk)) {
+                throw new Error("Mint A and Mint B must be different")
+            }
             const aInfo = await getMint(connection, aPk)
             const bInfo = await getMint(connection, bPk)
             const deposit = parseTokenAmount(offerAmount, aInfo.decimals)
             const amount = parseTokenAmount(askAmount, bInfo.decimals)
+            if (deposit.isZero()) {
+                throw new Error("Deposit must be greater than zero")
+            }
+            if (amount.isZero()) {
+                throw new Error("Amount taker must pay must be greater than zero")
+            }
             const expiryUnix = expiry
                 ? Math.floor(new Date(expiry).getTime() / 1000)
                 : null

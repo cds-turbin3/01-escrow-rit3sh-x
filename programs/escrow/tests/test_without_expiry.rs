@@ -105,13 +105,11 @@ fn refund_returns_vault_and_closes_state() {
 
 #[test]
 fn take_drains_vault_when_deposit_differs_from_amount() {
-    // The maker deposits more A than the ask price in B. Take must drain the
-    // entire vault to the taker (not just `amount`) so vault.close succeeds.
     let (mut svm, maker_authority, taker_authority) = setup();
     let accounts = EscrowAccounts::new(&mut svm, &maker_authority, &taker_authority, 200);
 
-    let deposit = 10_000_000; // 10 A locked
-    let amount = 4_000_000; // 4 B asked
+    let deposit = 10_000_000;
+    let amount = 4_000_000;
 
     send_instruction(
         &mut svm,
@@ -124,11 +122,9 @@ fn take_drains_vault_when_deposit_differs_from_amount() {
 
     send_instruction(&mut svm, &taker_authority, accounts.take_ix());
 
-    // Vault + escrow closed (no leftover blocking the close).
     assert!(svm.get_account(&accounts.escrow).is_none());
     assert!(svm.get_account(&accounts.vault).is_none());
 
-    // Taker paid `amount` of B and received the *full deposit* of A.
     assert_eq!(
         taker_b_before - token_balance(&svm, &accounts.taker_ata_b),
         amount

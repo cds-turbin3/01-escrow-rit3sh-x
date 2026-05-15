@@ -39,7 +39,9 @@ export function EscrowCard({
             <header className="flex items-baseline justify-between gap-4">
                 <button
                     type="button"
-                    onClick={() => navigator.clipboard.writeText(publicKey.toBase58())}
+                    onClick={() =>
+                        navigator.clipboard.writeText(publicKey.toBase58())
+                    }
                     title="copy address"
                     className="text-left text-xs text-muted-foreground hover:text-foreground"
                 >

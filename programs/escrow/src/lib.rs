@@ -28,8 +28,10 @@ pub mod escrow {
 
     #[instruction(discriminator = 1)]
     pub fn take(ctx: Context<Take>) -> Result<()> {
-        ctx.accounts.deposit()?;
-        ctx.accounts.withdraw_and_close_vault()
+        let now = Clock::get()?.unix_timestamp;
+        ctx.accounts.escrow.assert_active(now)?;
+        ctx.accounts.pay_maker()?;
+        ctx.accounts.release_to_taker()
     }
 
     #[instruction(discriminator = 2)]

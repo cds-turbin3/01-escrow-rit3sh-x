@@ -151,13 +151,19 @@ export function addTrackedEscrow(wallet: PublicKey, pda: string): void {
     const list = loadTrackedEscrows(wallet)
     if (list.includes(pda)) return
     list.push(pda)
-    localStorage.setItem(STORAGE_PREFIX + wallet.toBase58(), JSON.stringify(list))
+    localStorage.setItem(
+        STORAGE_PREFIX + wallet.toBase58(),
+        JSON.stringify(list)
+    )
 }
 
 export function removeTrackedEscrow(wallet: PublicKey, pda: string): void {
     if (typeof localStorage === "undefined") return
     const list = loadTrackedEscrows(wallet).filter((p) => p !== pda)
-    localStorage.setItem(STORAGE_PREFIX + wallet.toBase58(), JSON.stringify(list))
+    localStorage.setItem(
+        STORAGE_PREFIX + wallet.toBase58(),
+        JSON.stringify(list)
+    )
 }
 
 export async function fetchMintDecimals(

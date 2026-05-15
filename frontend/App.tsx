@@ -54,7 +54,9 @@ export function App() {
                         />
 
                         <section className="flex flex-col gap-3">
-                            <h2 className="text-sm font-medium">Your escrows</h2>
+                            <h2 className="text-sm font-medium">
+                                Your escrows
+                            </h2>
                             {loading ? (
                                 <p className="text-sm text-muted-foreground">
                                     Loading…
