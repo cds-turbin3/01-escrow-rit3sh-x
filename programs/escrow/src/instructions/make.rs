@@ -7,6 +7,11 @@ use anchor_spl::token_interface::{
     transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked,
 };
 
+#[cfg_attr(
+    not(target_os = "solana"),
+    derive(anchor_litesvm::BundledPubkeys),
+    bundled_with(crate::test_helpers::EscrowBundle)
+)]
 #[derive(Accounts)]
 #[instruction(seed: u64)]
 pub struct Make<'info> {

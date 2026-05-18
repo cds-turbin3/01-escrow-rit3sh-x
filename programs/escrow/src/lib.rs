@@ -3,11 +3,14 @@ pub mod error;
 pub mod instructions;
 pub mod state;
 
+#[cfg(not(target_os = "solana"))]
+pub mod test_helpers;
+
 pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("Exn6aYyaYd87AhNrEKhaGHXGJgXumXeNCkJnkKzM23wV");
+declare_id!("5YuYrfNC8emUaLBbHcu7AvyxNRgbvp9B5TaDehFz9g9K");
 
 #[program]
 pub mod escrow {
