@@ -314,7 +314,7 @@ dependencies = [
 [[package]]
 name = "anchor-litesvm"
 version = "0.4.0"
-source = "git+https://github.com/cds-rs/anchor-litesvm?branch=class%2Fask#38f93f9305194826f8e420efcccf306e84550a6c"
+source = "git+https://github.com/cds-rs/anchor-litesvm?branch=class%2Fask#ff7ad71cb6a4c349a29bffa0ad4dc3cdc8b1f6cf"
 dependencies = [
  "anchor-lang",
  "anchor-litesvm-derive",
@@ -338,7 +338,7 @@ dependencies = [
 [[package]]
 name = "anchor-litesvm-derive"
 version = "0.4.0"
-source = "git+https://github.com/cds-rs/anchor-litesvm?branch=class%2Fask#38f93f9305194826f8e420efcccf306e84550a6c"
+source = "git+https://github.com/cds-rs/anchor-litesvm?branch=class%2Fask#ff7ad71cb6a4c349a29bffa0ad4dc3cdc8b1f6cf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1859,7 +1859,7 @@ dependencies = [
 [[package]]
 name = "litesvm-utils"
 version = "0.4.0"
-source = "git+https://github.com/cds-rs/anchor-litesvm?branch=class%2Fask#38f93f9305194826f8e420efcccf306e84550a6c"
+source = "git+https://github.com/cds-rs/anchor-litesvm?branch=class%2Fask#ff7ad71cb6a4c349a29bffa0ad4dc3cdc8b1f6cf"
 dependencies = [
  "litesvm 0.11.0",
  "litesvm-token 0.11.0",

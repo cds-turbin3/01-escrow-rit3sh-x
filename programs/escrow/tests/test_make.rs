@@ -42,10 +42,8 @@ fn make_works_expiry() {
     ctx.svm.send_ok(ix, &[&accs.maker]);
 
     // The persisted escrow should round-trip the expiry we passed in.
-    assert_eq!(
-        ctx.get_account::<Escrow>(&accs.escrow).unwrap().expiry_utc,
-        Some(expiry),
-    );
+    let escrow: Escrow = ctx.load(&accs.escrow);
+    assert_eq!(escrow.expiry_utc, Some(expiry));
 }
 
 #[test]
@@ -61,7 +59,7 @@ fn make_locks_tokens_in_vault_and_initialises_escrow() {
     assert_eq!(before - after, DEPOSIT, "maker A balance should drop by DEPOSIT");
     assert_eq!(ctx.svm.token_balance(&accs.vault), Some(DEPOSIT));
 
-    let escrow: Escrow = ctx.get_account(&accs.escrow).unwrap();
+    let escrow: Escrow = ctx.load(&accs.escrow);
     assert_eq!(escrow.seed, SEED);
     assert_eq!(escrow.maker, accs.bundle.maker);
     assert_eq!(escrow.mint_a, accs.bundle.mint_a);
@@ -101,10 +99,8 @@ fn deposit_and_amount_can_differ() {
     ctx.svm.send_ok(ix, &[&accs.maker]);
 
     assert_eq!(ctx.svm.token_balance(&accs.vault), Some(deposit));
-    assert_eq!(
-        ctx.get_account::<Escrow>(&accs.escrow).unwrap().amount,
-        amount,
-    );
+    let escrow: Escrow = ctx.load(&accs.escrow);
+    assert_eq!(escrow.amount, amount);
 }
 
 #[test]
